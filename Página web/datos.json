@@ -1,0 +1,16 @@
+{
+  "modo": "etiqueta",
+  "etiqueta": {
+    "nombre": "LM741",
+    "precio": "0.99 EUR",
+    "codigo": "203",
+    "estado": "Stock",
+    "extra": "88 uds",
+    "descripcion": "Amplificador operacional"
+  },
+  "version": 43,
+  "bajo_consumo": {
+    "activo": true,
+    "intervalo_s": 600
+  }
+}

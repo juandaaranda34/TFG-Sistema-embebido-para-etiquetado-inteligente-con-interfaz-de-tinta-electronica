@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configurador de etiqueta e-Paper</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg1: #eef4fb;
+      --bg2: #dfeaf8;
+      --card: rgba(255, 255, 255, 0.94);
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --border: #d6deea;
+      --shadow: 0 14px 34px rgba(18, 38, 63, 0.10);
+      --radius: 22px;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .header {
+      margin-bottom: 24px;
+      padding: 8px 4px;
+    }
+
+    .header h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.3rem;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 950px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .left-grid,
+    .right-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.55);
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      margin: 0 0 18px 0;
+      font-size: 1.35rem;
+    }
+
+    .section-title {
+      margin: 24px 0 12px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 14px;
+    }
+
+    .row label {
+      margin-bottom: 7px;
+      font-weight: bold;
+      font-size: 0.96rem;
+    }
+
+    .row input,
+    .row select,
+    .row textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 0.98rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      outline: none;
+      background: white;
+      color: var(--text);
+    }
+
+    .row textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .row input:focus,
+    .row select:focus,
+    .row textarea:focus {
+      border-color: #8cb4ff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.97;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-dark {
+      background: #111827;
+      color: white;
+    }
+
+    .status-box {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-weight: bold;
+      line-height: 1.4;
+    }
+
+    .hint {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.5;
+    }
+
+    .sensor-note {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .top-stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat-box {
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: bold;
+      line-height: 1.1;
+    }
+
+    .preview-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .preview-info {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .epaper-stage {
+      background: linear-gradient(180deg, #f7f9fc, #eef3f9);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      min-height: 390px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .label-preview {
+      width: 540px;
+      max-width: 100%;
+      aspect-ratio: 250 / 122;
+      background: white;
+      border: 3px solid #111827;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px 6px 14px;
+      border-bottom: 2px solid #111827;
+      min-height: 28%;
+    }
+
+    .label-name {
+      font-size: clamp(0.95rem, 2vw, 1.45rem);
+      font-weight: bold;
+      line-height: 1.1;
+      max-width: 72%;
+      word-break: break-word;
+    }
+
+    .label-code {
+      font-size: clamp(0.65rem, 1.2vw, 0.92rem);
+      text-align: right;
+      max-width: 26%;
+      word-break: break-word;
+    }
+
+    .label-middle {
+      display: flex;
+      flex: 1;
+      min-height: 42%;
+    }
+
+    .label-price-area {
+      flex: 1.1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 2px solid #111827;
+      padding: 8px;
+    }
+
+    .label-price {
+      font-size: clamp(1.7rem, 5vw, 3.5rem);
+      font-weight: bold;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .label-side {
+      width: 30%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label-status {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-bottom: 2px solid #111827;
+      font-size: clamp(0.72rem, 1.5vw, 1rem);
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .label-extra {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      font-size: clamp(0.66rem, 1.2vw, 0.96rem);
+      text-align: center;
+    }
+
+    .label-bottom {
+      border-top: 2px solid #111827;
+      padding: 8px 12px;
+      min-height: 24%;
+      display: flex;
+      align-items: center;
+      font-size: clamp(0.66rem, 1.3vw, 1rem);
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .sensor-preview {
+      width: 540px;
+      max-width: 100%;
+      aspect-ratio: 250 / 122;
+      background: white;
+      border: 3px solid #111827;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      display: none;
+      padding: 16px;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sensor-title {
+      font-size: 1rem;
+      font-weight: bold;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 8px;
+    }
+
+    .sensor-grid-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+      flex: 1;
+      align-content: center;
+    }
+
+    .sensor-item {
+      border: 2px solid #111827;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      background: #fafafa;
+    }
+
+    .sensor-item-title {
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+
+    .sensor-item-value {
+      font-size: 1.15rem;
+      font-weight: bold;
+    }
+
+    .sensor-footer {
+      border-top: 2px solid #111827;
+      padding-top: 8px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .chart-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    }
+
+    .chart-card h3 {
+      margin: 0 0 12px 0;
+      font-size: 1rem;
+    }
+
+    .chart-card canvas {
+      width: 100% !important;
+      height: 240px !important;
+    }
+
+    @media (max-width: 1200px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .top-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .top-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Configurador de etiqueta e-Paper</h1>
+      <p>
+        Aplicación web local para configurar el contenido mostrado en la pantalla,
+        supervisar los datos ambientales recibidos desde el ESP32 y consultar el
+        histórico de medidas de temperatura, humedad y presión.
+      </p>
+    </div>
+
+    <div class="main-grid">
+      <div class="left-grid">
+      <section class="card">
+        <h2>Configuración del dispositivo</h2>
+
+        <div class="row">
+          <label for="modo">Modo de funcionamiento</label>
+          <select id="modo" onchange="actualizarVista()">
+            <option value="sensores">Modo sensores</option>
+            <option value="etiqueta">Modo etiqueta</option>
+          </select>
+        </div>
+
+        <div id="bloqueEtiqueta">
+          <div class="section-title">Datos de la etiqueta</div>
+
+          <div class="row">
+            <label for="nombre">Nombre del producto</label>
+            <input type="text" id="nombre" placeholder="Ej. Tornillo M8 galvanizado" oninput="actualizarVista()" />
+          </div>
+
+          <div class="form-grid">
+            <div class="row">
+              <label for="precio">Precio</label>
+              <input type="text" id="precio" placeholder="Ej. 1,50 €" oninput="actualizarVista()" />
+            </div>
+
+            <div class="row">
+              <label for="codigo">Código / referencia</label>
+              <input type="text" id="codigo" placeholder="Ej. REF-203" oninput="actualizarVista()" />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="row">
+              <label for="estadoCampo">Estado / aviso</label>
+              <input type="text" id="estadoCampo" placeholder="Ej. Oferta / Stock / Nuevo" oninput="actualizarVista()" />
+            </div>
+
+            <div class="row">
+              <label for="extra">Información extra</label>
+              <input type="text" id="extra" placeholder="Ej. Caja 100 uds / IVA incl." oninput="actualizarVista()" />
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" placeholder="Ej. Acero zincado para montaje industrial." oninput="actualizarVista()"></textarea>
+          </div>
+        </div>
+
+        <div id="bloqueSensores" class="sensor-note" style="display: none;">
+          <strong>Modo sensores activo.</strong><br>
+          En este modo la pantalla e-paper mostrará la plantilla de monitorización
+          ambiental. El histórico de medidas se seguirá registrando en cualquier caso.
+        </div>
+
+        <div class="buttons">
+          <button class="btn-primary" onclick="guardarDatos()">Guardar configuración</button>
+          <button class="btn-secondary" onclick="cargarEjemploEtiqueta()">Cargar ejemplo etiqueta</button>
+          <button class="btn-dark" onclick="activarModoSensores()">Activar modo sensores</button>
+        </div>
+
+        <div class="status-box" id="estadoGuardado">Sin guardar</div>
+
+        <p class="hint">
+          La configuración se almacena en <strong>datos.json</strong>, mientras que
+          las medidas recibidas desde el ESP32 se almacenan por separado para la
+          monitorización y el histórico.
+        </p>
+      </section>
+
+      <!-- Tarjeta de batería: muestra la última lectura enviada por el ESP32. -->
+      <section class="card">
+        <h2>Estado de la batería</h2>
+        <div class="top-stats" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+          <div class="stat-box">
+            <div class="stat-label">Nivel estimado</div>
+            <div class="stat-value" id="sensorBat">-- %</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Tensión VBAT</div>
+            <div class="stat-value" id="sensorVbat">-- V</div>
+          </div>
+        </div>
+        <p class="hint">
+          El nivel de batería se calcula a partir de la tensión medida en el divisor resistivo conectado al GPIO1.
+          El porcentaje mostrado es una estimación orientativa.
+        </p>
+      </section>
+
+      <!--
+        Tarjeta de bajo consumo:
+        permite activar/desactivar desde la web el modo deep sleep del ESP32.
+        El ESP32 leerá esta configuración cuando consulte el endpoint /datos.
+      -->
+      <section class="card">
+        <h2>Modo bajo consumo</h2>
+
+        <div class="top-stats" style="grid-template-columns: 1fr; margin-bottom: 14px;">
+          <div class="stat-box">
+            <div class="stat-label">Estado</div>
+            <div class="stat-value" id="estadoBajoConsumo">Desactivado</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="intervaloBajoConsumo">Intervalo de despertar</label>
+          <select id="intervaloBajoConsumo" onchange="actualizarIntervaloBajoConsumo()">
+            <option value="60">1 min</option>
+            <option value="300">5 min</option>
+            <option value="600" selected>10 min</option>
+            <option value="900">15 min</option>
+            <option value="1800">30 min</option>
+            <option value="3600">1 h</option>
+          </select>
+        </div>
+
+        <div class="buttons">
+          <button class="btn-primary" id="btnBajoConsumo" onclick="alternarBajoConsumo()">Activar</button>
+        </div>
+
+        <div class="status-box" id="estadoGuardadoBajoConsumo">Configuración de bajo consumo sin modificar</div>
+
+        <p class="hint">
+          Si se activa este modo, el ESP32 consultará el servidor, actualizará la pantalla solo si procede,
+          enviará los datos de batería/sensores y entrará en <em>deep sleep</em> durante el intervalo seleccionado.
+        </p>
+      </section>
+      </div>
+
+      <div class="right-grid">
+        <section class="card">
+          <h2>Monitorización del sensor ambiental</h2>
+
+          <div class="top-stats">
+            <div class="stat-box">
+              <div class="stat-label">Temperatura</div>
+              <div class="stat-value" id="sensorTemp">-- °C</div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-label">Humedad</div>
+              <div class="stat-value" id="sensorHum">-- %</div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-label">Presión</div>
+              <div class="stat-value" id="sensorPres">-- hPa</div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-label">Última actualización</div>
+              <div class="stat-value" id="sensorAct">--:--:--</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Vista previa de la pantalla e-Paper</h2>
+
+          <div class="preview-layout">
+            <div class="preview-info">
+              La vista previa representa la disposición aproximada del contenido
+              que se mostrará en la pantalla según el modo seleccionado.
+            </div>
+
+            <div class="epaper-stage">
+              <div class="label-preview" id="labelPreview">
+                <div class="label-top">
+                  <div class="label-name" id="prevNombre">Nombre del producto</div>
+                  <div class="label-code" id="prevCodigo">REF-000</div>
+                </div>
+
+                <div class="label-middle">
+                  <div class="label-price-area">
+                    <div class="label-price" id="prevPrecio">0,00 €</div>
+                  </div>
+
+                  <div class="label-side">
+                    <div class="label-status" id="prevEstadoCampo">Estado</div>
+                    <div class="label-extra" id="prevExtra">Info extra</div>
+                  </div>
+                </div>
+
+                <div class="label-bottom" id="prevDescripcion">
+                  Descripción del producto
+                </div>
+              </div>
+
+              <div class="sensor-preview" id="sensorPreview">
+                <div class="sensor-title">Monitor ambiental</div>
+
+                <div class="sensor-grid-preview">
+                  <div class="sensor-item">
+                    <div class="sensor-item-title">Temperatura</div>
+                    <div class="sensor-item-value" id="sensorTempPreview">-- °C</div>
+                  </div>
+
+                  <div class="sensor-item">
+                    <div class="sensor-item-title">Humedad</div>
+                    <div class="sensor-item-value" id="sensorHumPreview">-- %</div>
+                  </div>
+
+                  <div class="sensor-item">
+                    <div class="sensor-item-title">Presión</div>
+                    <div class="sensor-item-value" id="sensorPresPreview">-- hPa</div>
+                  </div>
+
+                  <div class="sensor-item">
+                    <div class="sensor-item-title">Actualización</div>
+                    <div class="sensor-item-value" id="sensorActPreview">--:--:--</div>
+                  </div>
+                </div>
+
+                <div class="sensor-footer">
+                  Valores proporcionados automáticamente por el sensor
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Histórico de medidas</h2>
+
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>Temperatura</h3>
+              <canvas id="chartTemp"></canvas>
+            </div>
+
+            <div class="chart-card">
+              <h3>Humedad</h3>
+              <canvas id="chartHum"></canvas>
+            </div>
+
+            <div class="chart-card">
+              <h3>Presión</h3>
+              <canvas id="chartPres"></canvas>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let versionActual = 1;
+    let tempChart, humChart, presChart;
+
+    // Configuración del modo bajo consumo.
+    // Estos valores se guardan en el servidor y los leerá el ESP32 desde /datos.
+    let bajoConsumoActivo = false;
+    let intervaloWakeupS = 600;
+
+    function valorO(id, fallback) {
+      const valor = document.getElementById(id).value.trim();
+      return valor === "" ? fallback : valor;
+    }
+
+    function actualizarVista() {
+      const modo = document.getElementById("modo").value;
+
+      document.getElementById("prevNombre").textContent = valorO("nombre", "Nombre del producto");
+      document.getElementById("prevPrecio").textContent = valorO("precio", "0,00 €");
+      document.getElementById("prevCodigo").textContent = valorO("codigo", "REF-000");
+      document.getElementById("prevEstadoCampo").textContent = valorO("estadoCampo", "Estado");
+      document.getElementById("prevExtra").textContent = valorO("extra", "Info extra");
+      document.getElementById("prevDescripcion").textContent = valorO("descripcion", "Descripción del producto");
+
+      const labelPreview = document.getElementById("labelPreview");
+      const sensorPreview = document.getElementById("sensorPreview");
+      const bloqueEtiqueta = document.getElementById("bloqueEtiqueta");
+      const bloqueSensores = document.getElementById("bloqueSensores");
+
+      if (modo === "etiqueta") {
+        labelPreview.style.display = "flex";
+        sensorPreview.style.display = "none";
+        bloqueEtiqueta.style.display = "block";
+        bloqueSensores.style.display = "none";
+      } else {
+        labelPreview.style.display = "none";
+        sensorPreview.style.display = "flex";
+        bloqueEtiqueta.style.display = "none";
+        bloqueSensores.style.display = "block";
+      }
+    }
+
+    async function guardarDatos() {
+      const payload = {
+        modo: document.getElementById("modo").value,
+        etiqueta: {
+          nombre: document.getElementById("nombre").value,
+          precio: document.getElementById("precio").value,
+          codigo: document.getElementById("codigo").value,
+          estado: document.getElementById("estadoCampo").value,
+          extra: document.getElementById("extra").value,
+          descripcion: document.getElementById("descripcion").value
+        },
+        // Se mantiene también la configuración energética para no perderla
+        // al guardar cambios de la etiqueta.
+        bajo_consumo: {
+          activo: bajoConsumoActivo,
+          intervalo_s: intervaloWakeupS
+        },
+        version: versionActual++
+      };
+
+      try {
+        const res = await fetch("/guardar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const texto = await res.text();
+        document.getElementById("estadoGuardado").textContent =
+          texto + " | Versión " + (versionActual - 1);
+      } catch (e) {
+        document.getElementById("estadoGuardado").textContent =
+          "Error al guardar la configuración";
+      }
+    }
+
+    // Actualiza el texto del recuadro de bajo consumo según el estado actual.
+    function actualizarVistaBajoConsumo() {
+      const estado = document.getElementById("estadoBajoConsumo");
+      const boton = document.getElementById("btnBajoConsumo");
+      const selector = document.getElementById("intervaloBajoConsumo");
+
+      estado.textContent = bajoConsumoActivo ? "Activado" : "Desactivado";
+      boton.textContent = bajoConsumoActivo ? "Desactivar" : "Activar";
+      selector.value = String(intervaloWakeupS);
+    }
+
+    // Lee el intervalo elegido en el desplegable.
+    // No se aplica al ESP32 hasta guardar o pulsar el botón de activar/desactivar.
+    function actualizarIntervaloBajoConsumo() {
+      intervaloWakeupS = parseInt(document.getElementById("intervaloBajoConsumo").value, 10);
+    }
+
+    // Activa o desactiva el modo deep sleep desde la página web.
+    // Se usa un endpoint separado para no incrementar la versión de la etiqueta:
+    // cambiar el modo de bajo consumo no debería obligar a refrescar la pantalla.
+    async function alternarBajoConsumo() {
+      actualizarIntervaloBajoConsumo();
+      bajoConsumoActivo = !bajoConsumoActivo;
+      actualizarVistaBajoConsumo();
+
+      const payload = {
+        activo: bajoConsumoActivo,
+        intervalo_s: intervaloWakeupS
+      };
+
+      try {
+        const res = await fetch("/bajo_consumo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const texto = await res.text();
+        document.getElementById("estadoGuardadoBajoConsumo").textContent =
+          texto + " | " + (bajoConsumoActivo ? "Activado" : "Desactivado");
+      } catch (e) {
+        document.getElementById("estadoGuardadoBajoConsumo").textContent =
+          "Error al guardar la configuración de bajo consumo";
+      }
+    }
+
+    function crearGrafico(canvasId, titulo) {
+      const ctx = document.getElementById(canvasId).getContext("2d");
+      return new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [{
+            label: titulo,
+            data: [],
+            tension: 0.25,
+            borderWidth: 2,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          scales: {
+            x: {
+              ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }
+            },
+            y: {
+              beginAtZero: false
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    function extraerNumero(valor) {
+      if (!valor) return null;
+      const n = parseFloat(String(valor).replace(",", "."));
+      return Number.isNaN(n) ? null : n;
+    }
+
+    async function actualizarSensoresDesdeServidor() {
+      try {
+        const res = await fetch("/sensores");
+        const data = await res.json();
+
+        document.getElementById("sensorTemp").textContent = data.temperatura || "-- °C";
+        document.getElementById("sensorHum").textContent = data.humedad || "-- %";
+        document.getElementById("sensorPres").textContent = data.presion || "-- hPa";
+        document.getElementById("sensorAct").textContent = data.actualizacion || "--:--:--";
+        document.getElementById("sensorBat").textContent = data.bateria || "-- %";
+        document.getElementById("sensorVbat").textContent = data.vbat || "-- V";
+
+        document.getElementById("sensorTempPreview").textContent = data.temperatura || "-- °C";
+        document.getElementById("sensorHumPreview").textContent = data.humedad || "-- %";
+        document.getElementById("sensorPresPreview").textContent = data.presion || "-- hPa";
+        document.getElementById("sensorActPreview").textContent = data.actualizacion || "--:--:--";
+      } catch (e) {
+        console.log("No se pudieron leer los sensores actuales");
+      }
+    }
+
+    async function actualizarHistorico() {
+      try {
+        const res = await fetch("/sensores_historial");
+        const historial = await res.json();
+
+        const labels = historial.map(x => x.actualizacion || "");
+        const temps = historial.map(x => extraerNumero(x.temperatura));
+        const hums = historial.map(x => extraerNumero(x.humedad));
+        const press = historial.map(x => extraerNumero(x.presion));
+
+        tempChart.data.labels = labels;
+        tempChart.data.datasets[0].data = temps;
+        tempChart.update();
+
+        humChart.data.labels = labels;
+        humChart.data.datasets[0].data = hums;
+        humChart.update();
+
+        presChart.data.labels = labels;
+        presChart.data.datasets[0].data = press;
+        presChart.update();
+
+      } catch (e) {
+        console.log("No se pudo leer el histórico");
+      }
+    }
+
+    async function cargarConfiguracion() {
+      try {
+        const res = await fetch("/datos");
+        const data = await res.json();
+
+        if (data.modo) document.getElementById("modo").value = data.modo;
+        if (data.etiqueta) {
+          document.getElementById("nombre").value = data.etiqueta.nombre || "";
+          document.getElementById("precio").value = data.etiqueta.precio || "";
+          document.getElementById("codigo").value = data.etiqueta.codigo || "";
+          document.getElementById("estadoCampo").value = data.etiqueta.estado || "";
+          document.getElementById("extra").value = data.etiqueta.extra || "";
+          document.getElementById("descripcion").value = data.etiqueta.descripcion || "";
+        }
+
+        if (data.bajo_consumo) {
+          bajoConsumoActivo = Boolean(data.bajo_consumo.activo);
+          intervaloWakeupS = data.bajo_consumo.intervalo_s || 600;
+        } else {
+          bajoConsumoActivo = false;
+          intervaloWakeupS = 600;
+        }
+
+        if (typeof data.version === "number") {
+          versionActual = data.version + 1;
+        }
+
+        actualizarVista();
+        actualizarVistaBajoConsumo();
+      } catch (e) {
+        console.log("No se pudo cargar la configuración");
+      }
+    }
+
+    function cargarEjemploEtiqueta() {
+      document.getElementById("modo").value = "etiqueta";
+      document.getElementById("nombre").value = "Tornillo M8 galvanizado";
+      document.getElementById("precio").value = "1,50 €";
+      document.getElementById("codigo").value = "REF-203";
+      document.getElementById("estadoCampo").value = "Oferta";
+      document.getElementById("extra").value = "Caja 100 uds";
+      document.getElementById("descripcion").value = "Acero zincado para montaje industrial.";
+      actualizarVista();
+    }
+
+    function activarModoSensores() {
+      document.getElementById("modo").value = "sensores";
+      actualizarVista();
+    }
+
+    tempChart = crearGrafico("chartTemp", "Temperatura");
+    humChart = crearGrafico("chartHum", "Humedad");
+    presChart = crearGrafico("chartPres", "Presión");
+
+    cargarConfiguracion();
+    actualizarVistaBajoConsumo();
+    actualizarSensoresDesdeServidor();
+    actualizarHistorico();
+
+    setInterval(actualizarSensoresDesdeServidor, 3000);
+    setInterval(actualizarHistorico, 5000);
+  </script>
+</body>
+</html> 
